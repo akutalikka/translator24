@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Translator</title>
+    <script>
+        async function translateText() {
+            const text = document.getElementById("textInput").value;
+
+            if (!text) {
+                alert("Please enter some text to translate.");
+                return;
+            }
+
+            try {
+                // Google Translate API
+                const googleResponse = await fetch(`https://translation.googleapis.com/language/translate/v2?key=YOUR_GOOGLE_API_KEY`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        q: text,
+                        target: "ar",
+                        source: "en"
+                    }),
+                });
+                const googleResult = await googleResponse.json();
+                const googleTranslation = googleResult.data.translations[0].translatedText;
+
+                // Bing Translator API (Azure Cognitive Services)
+                const subscriptionKey = 'YOUR_BING_API_KEY';
+                const endpoint = 'https://api.cognitive.microsofttranslator.com/translate?api-version=3.0&to=ar&from=en';
+                const bingResponse = await fetch(endpoint, {
+                    method: "POST",
+                    headers: {
+                        "Ocp-Apim-Subscription-Key": subscriptionKey,
+                        "Ocp-Apim-Subscription-Region": "YOUR_REGION", // Change to your region
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify([{ Text: text }]),
+                });
+                const bingResult = await bingResponse.json();
+                const bingTranslation = bingResult[0].translations[0].text;
+
+                // Display the translations
+                document.getElementById("googleTranslation").textContent = "Google Translation: " + googleTranslation;
+                document.getElementById("bingTranslation").textContent = "Bing Translation: " + bingTranslation;
+
+            } catch (error) {
+                console.error("Error translating text:", error);
+                alert("An error occurred while translating. Please try again.");
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>English to Arabic Translator</h1>
+    <input type="text" id="textInput" placeholder="Enter text in English">
+    <button onclick="translateText()">Translate</button>
+
+    <h2>Translations:</h2>
+    <p id="googleTranslation">Google Translation: </p>
+    <p id="bingTranslation">Bing Translation: </p>
+</body>
+</html>
